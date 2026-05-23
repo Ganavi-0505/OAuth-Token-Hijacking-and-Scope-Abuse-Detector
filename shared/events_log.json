@@ -1,1 +1,154 @@
-[]
+[
+  {
+    "type": "auth_attempt",
+    "timestamp": "2026-05-23T12:26:13",
+    "message": "Victim clicked authorize \u2014 redirecting to Google consent screen",
+    "scopes_requested": [
+      "openid",
+      "email",
+      "profile",
+      "https://mail.google.com",
+      "https://www.googleapis.com/auth/drive"
+    ]
+  },
+  {
+    "type": "auth_attempt",
+    "timestamp": "2026-05-23T12:40:13",
+    "message": "Victim clicked authorize \u2014 redirecting to Google consent screen",
+    "scopes_requested": [
+      "openid",
+      "email",
+      "profile",
+      "https://mail.google.com",
+      "https://www.googleapis.com/auth/drive"
+    ]
+  },
+  {
+    "type": "auth_attempt",
+    "timestamp": "2026-05-23T12:40:22",
+    "message": "Victim clicked authorize \u2014 redirecting to Google consent screen",
+    "scopes_requested": [
+      "openid",
+      "email",
+      "profile",
+      "https://mail.google.com",
+      "https://www.googleapis.com/auth/drive"
+    ]
+  },
+  {
+    "type": "auth_attempt",
+    "timestamp": "2026-05-23T12:48:30",
+    "message": "Victim clicked authorize \u2014 redirecting to Google consent screen",
+    "scopes_requested": [
+      "openid",
+      "email",
+      "profile",
+      "https://mail.google.com",
+      "https://www.googleapis.com/auth/drive"
+    ]
+  },
+  {
+    "type": "auth_attempt",
+    "timestamp": "2026-05-23T12:50:28",
+    "message": "Victim clicked authorize \u2014 redirecting to Google consent screen",
+    "scopes_requested": [
+      "openid",
+      "email",
+      "profile",
+      "https://mail.google.com",
+      "https://www.googleapis.com/auth/drive"
+    ]
+  },
+  {
+    "type": "auth_attempt",
+    "timestamp": "2026-05-23T12:56:06",
+    "message": "Victim clicked authorize \u2014 redirecting to Google consent screen",
+    "scopes_requested": [
+      "openid",
+      "email",
+      "profile",
+      "https://mail.google.com",
+      "https://www.googleapis.com/auth/drive"
+    ]
+  },
+  {
+    "type": "auth_attempt",
+    "timestamp": "2026-05-23T13:00:02",
+    "message": "Victim clicked authorize \u2014 redirecting to Google consent screen",
+    "scopes_requested": [
+      "openid",
+      "email",
+      "profile",
+      "https://mail.google.com",
+      "https://www.googleapis.com/auth/drive"
+    ]
+  },
+  {
+    "type": "auth_attempt",
+    "timestamp": "2026-05-23T13:07:50",
+    "message": "Victim clicked authorize \u2014 redirecting to Google consent screen",
+    "scopes_requested": [
+      "openid",
+      "email",
+      "profile",
+      "https://mail.google.com",
+      "https://www.googleapis.com/auth/drive"
+    ]
+  },
+  {
+    "type": "auth_attempt",
+    "timestamp": "2026-05-23T13:08:27",
+    "message": "Victim clicked authorize \u2014 redirecting to Google consent screen",
+    "scopes_requested": [
+      "openid",
+      "email",
+      "profile",
+      "https://mail.google.com",
+      "https://www.googleapis.com/auth/drive"
+    ]
+  },
+  {
+    "type": "auth_attempt",
+    "timestamp": "2026-05-23T13:11:01",
+    "message": "Victim clicked authorize \u2014 redirecting to Google consent screen",
+    "scopes_requested": [
+      "openid",
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/userinfo.profile",
+      "https://mail.google.com/",
+      "https://www.googleapis.com/auth/drive"
+    ]
+  },
+  {
+    "type": "token_captured",
+    "token_id": "C00A2648",
+    "app_name": "HR Rewards Planner",
+    "email": "nixnbunny42@gmail.com",
+    "scopes": [
+      "openid",
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/userinfo.profile",
+      "https://mail.google.com/",
+      "https://www.googleapis.com/auth/drive"
+    ],
+    "has_refresh": true,
+    "token_preview": "ya29.a0AQvPyIOa6ZhO6DXegUDFKnoxw6QBmiogH",
+    "timestamp": "2026-05-23T13:11:37",
+    "status": "evicted"
+  },
+  {
+    "type": "exfil_complete",
+    "token_id": "C00A2648",
+    "email": "nixnbunny42@gmail.com",
+    "records": 11,
+    "timestamp": "2026-05-23T13:11:53",
+    "status": "evicted"
+  },
+  {
+    "type": "token_evicted",
+    "token_id": "C00A2648",
+    "by": "defensive_kill_switch",
+    "timestamp": "2026-05-23T13:18:40",
+    "status": "evicted"
+  }
+]
