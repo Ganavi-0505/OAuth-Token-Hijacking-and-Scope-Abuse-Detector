@@ -1,0 +1,53 @@
+{
+  "dangerous_combos": [
+    {
+      "scopes": ["https://mail.google.com", "offline_access"],
+      "score": 92,
+      "reason": "Persistent full Gmail access — primary exfiltration channel"
+    },
+    {
+      "scopes": ["https://www.googleapis.com/auth/drive", "offline_access"],
+      "score": 72,
+      "reason": "Long-lived Drive access — all files exposed indefinitely"
+    },
+    {
+      "scopes": ["https://mail.google.com", "https://www.googleapis.com/auth/drive"],
+      "score": 65,
+      "reason": "Email + file system in single grant — broad data exposure"
+    },
+    {
+      "scopes": ["https://www.googleapis.com/auth/admin.directory.user", "offline_access"],
+      "score": 96,
+      "reason": "Admin directory + persistence = full org compromise vector"
+    },
+    {
+      "scopes": ["https://mail.google.com", "https://www.googleapis.com/auth/drive", "offline_access"],
+      "score": 97,
+      "reason": "CRITICAL COMBO: Gmail + Drive + offline_access — full persistent data exfiltration"
+    }
+  ],
+  "individual_weights": {
+    "offline_access": 15,
+    "https://mail.google.com": 40,
+    "https://www.googleapis.com/auth/drive": 35,
+    "https://www.googleapis.com/auth/admin.directory.user": 60,
+    "https://www.googleapis.com/auth/calendar": 40,
+    "https://www.googleapis.com/auth/spreadsheets": 18,
+    "https://www.googleapis.com/auth/gmail.modify": 38,
+    "https://www.googleapis.com/auth/gmail.readonly": 22,
+    "openid": 3,
+    "email": 3,
+    "profile": 2
+  },
+  "compounding_penalty": {
+    "description": "Extra penalty when data modification rights + offline_access coexist",
+    "modifier_scopes": ["offline_access"],
+    "write_scopes": [
+      "https://mail.google.com",
+      "https://www.googleapis.com/auth/drive",
+      "https://www.googleapis.com/auth/admin.directory.user",
+      "https://www.googleapis.com/auth/gmail.modify"
+    ],
+    "penalty": 15
+  }
+}

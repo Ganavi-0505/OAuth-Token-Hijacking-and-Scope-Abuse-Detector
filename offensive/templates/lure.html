@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HR Rewards Planner — Acme Corp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f5f4f0; --surface: #ffffff; --border: #e8e5df;
+      --text: #1a1917; --muted: #6b6860; --accent: #2563eb;
+      --accent-h: #1d4ed8; --green: #16a34a;
+    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    nav {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 0 40px; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+      font-family: 'DM Serif Display', serif; font-size: 20px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .nav-logo .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+    .nav-links { display: flex; gap: 28px; }
+    .nav-links a { font-size: 13px; color: var(--muted); text-decoration: none; font-weight: 500; }
+    .nav-cta {
+      background: var(--accent); color: white; border: none; border-radius: 6px;
+      padding: 8px 18px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit;
+    }
+
+    .hero {
+      max-width: 1100px; margin: 80px auto 0; padding: 0 40px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+    }
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #dcfce7; color: var(--green); border-radius: 100px;
+      padding: 4px 12px; font-size: 12px; font-weight: 500; margin-bottom: 20px;
+    }
+    .badge .pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    h1 { font-family: 'DM Serif Display', serif; font-size: 48px; line-height: 1.15; margin-bottom: 20px; }
+    h1 span { color: var(--accent); }
+    .subtitle { font-size: 16px; color: var(--muted); line-height: 1.7; margin-bottom: 36px; }
+
+    .auth-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 36px; box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+    .auth-card h2 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+    .auth-card > p { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+    .google-btn {
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      width: 100%; background: var(--surface); border: 1px solid #d0cdc7;
+      border-radius: 8px; padding: 13px 20px; font-size: 14px; font-weight: 500;
+      color: var(--text); cursor: pointer; text-decoration: none; font-family: inherit;
+      transition: background 0.15s, box-shadow 0.15s; margin-bottom: 12px;
+    }
+    .google-btn:hover { background: #fafafa; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .divider {
+      display: flex; align-items: center; gap: 12px; margin: 16px 0;
+      color: var(--muted); font-size: 12px;
+    }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .email-input {
+      width: 100%; border: 1px solid var(--border); border-radius: 8px;
+      padding: 12px 14px; font-size: 14px; font-family: inherit;
+      color: var(--text); background: var(--bg); margin-bottom: 10px;
+    }
+    .continue-btn {
+      width: 100%; background: var(--accent); color: white; border: none;
+      border-radius: 8px; padding: 13px; font-size: 14px; font-weight: 500;
+      cursor: pointer; font-family: inherit;
+    }
+    .continue-btn:hover { background: var(--accent-h); }
+    .trust-row {
+      display: flex; align-items: center; gap: 6px; margin-top: 16px;
+      font-size: 11px; color: var(--muted);
+    }
+
+    .features { display: flex; flex-direction: column; gap: 16px; }
+    .feature { display: flex; align-items: flex-start; gap: 14px; }
+    .feature-icon {
+      width: 40px; height: 40px; border-radius: 10px; background: #eff6ff;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px;
+    }
+    .feature h3 { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+    .feature p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+    .logos { max-width: 1100px; margin: 80px auto; padding: 0 40px; text-align: center; }
+    .logos p { font-size: 12px; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 24px; }
+    .logo-row { display: flex; justify-content: center; gap: 48px; align-items: center; }
+    .logo-item { font-size: 15px; font-weight: 600; color: #c5c0b8; letter-spacing: -0.5px; }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-logo"><div class="dot"></div>Acme HR Suite</div>
+    <div class="nav-links">
+      <a href="#">Features</a><a href="#">Pricing</a><a href="#">Security</a><a href="#">Support</a>
+    </div>
+    <button class="nav-cta">Contact Sales</button>
+  </nav>
+
+  <div class="hero">
+    <div>
+      <div class="badge"><div class="pulse"></div>Now with AI-powered rewards intelligence</div>
+      <h1>Plan <span>smarter</span> rewards for every team</h1>
+      <p class="subtitle">
+        HR Rewards Planner connects to your company's Google Workspace to automatically surface
+        peer recognition data, calibrate bonuses, and generate executive-ready compensation
+        reports — all in one place.
+      </p>
+      <div class="features">
+        <div class="feature">
+          <div class="feature-icon">📊</div>
+          <div><h3>Automated Calibration</h3><p>Pull performance data directly from your existing tools. No manual imports.</p></div>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">🔒</div>
+          <div><h3>SOC 2 Type II Certified</h3><p>Your employee data stays encrypted in transit and at rest. Always.</p></div>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">⚡</div>
+          <div><h3>One-click Reports</h3><p>Generate board-ready comp summaries in seconds, not days.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="auth-card">
+      <h2>Connect your Workspace</h2>
+      <p>Sign in with your corporate Google account to get started. Takes 30 seconds.</p>
+      <a href="/authorize" class="google-btn">
+        <svg width="18" height="18" viewBox="0 0 48 48">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        </svg>
+        Continue with Google
+      </a>
+      <div class="divider">or</div>
+      <input class="email-input" type="email" placeholder="your@company.com">
+      <button class="continue-btn">Continue with Email</button>
+      <div class="trust-row">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        Protected by 256-bit TLS · SOC 2 Certified · GDPR Compliant
+      </div>
+    </div>
+  </div>
+
+  <div class="logos">
+    <p>Trusted by HR teams at</p>
+    <div class="logo-row">
+      <div class="logo-item">Meridian Group</div>
+      <div class="logo-item">Apex Financial</div>
+      <div class="logo-item">NovaCorp</div>
+      <div class="logo-item">Stratos Health</div>
+      <div class="logo-item">Lumen Works</div>
+    </div>
+  </div>
+</body>
+</html>

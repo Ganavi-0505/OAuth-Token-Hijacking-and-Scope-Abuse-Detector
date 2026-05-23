@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TokenGuard — SOC Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bs-body-bg: #0b0c0e;
+      --bs-body-color: #c9d1d9;
+      --surface: #111318;
+      --surface2: #161b22;
+      --border: #21262d;
+      --accent: #388bfd;
+      --mono: 'IBM Plex Mono', monospace;
+      --sans: 'IBM Plex Sans', sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      background: var(--bs-body-bg);
+      color: var(--bs-body-color);
+      font-family: var(--sans);
+      font-size: 14px;
+    }
+
+    /* ── Top nav ── */
+    .topnav {
+      background: #010409;
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-brand {
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 600;
+      color: #e6edf3;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-brand .shield { color: var(--accent); font-size: 16px; }
+    .nav-tag {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: #6e7681;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 8px;
+    }
+    .live-indicator {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: #3fb950;
+    }
+    .live-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #3fb950;
+      animation: livepulse 2s ease-in-out infinite;
+    }
+    @keyframes livepulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(63,185,80,0.4); }
+      50% { box-shadow: 0 0 0 5px rgba(63,185,80,0); }
+    }
+
+    /* ── Layout ── */
+    .page { padding: 28px; }
+    .page-header { margin-bottom: 28px; }
+    .page-title {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: #6e7681;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .page-heading {
+      font-size: 22px;
+      font-weight: 600;
+      color: #e6edf3;
+      letter-spacing: -0.3px;
+    }
+
+    /* ── Stat cards ── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card.danger-card { border-color: #da3633; }
+    .stat-card.attack-card {
+      border-color: #da3633;
+      background: #150b0b;
+      animation: dangerPulse 3s ease-in-out infinite;
+    }
+    @keyframes dangerPulse {
+      0%, 100% { border-color: #da3633; }
+      50% { border-color: #ff6b6b; box-shadow: 0 0 12px rgba(218,54,51,0.15); }
+    }
+    .stat-num {
+      font-family: var(--mono);
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .stat-label {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      color: #6e7681;
+      text-transform: uppercase;
+    }
+    .stat-num.c-critical { color: #f85149; }
+    .stat-num.c-high     { color: #d29922; }
+    .stat-num.c-medium   { color: #388bfd; }
+    .stat-num.c-low      { color: #3fb950; }
+    .stat-num.c-total    { color: #e6edf3; }
+    .stat-num.c-attack   { color: #f85149; }
+
+    /* ── Two-column layout ── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    /* ── Panel ── */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface2);
+    }
+    .panel-title {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: #8b949e;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .panel-count {
+      margin-left: auto;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: #6e7681;
+    }
+
+    /* ── Filter bar ── */
+    .filter-bar {
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 6px;
+      background: #0d1017;
+    }
+    .filter-btn {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.5px;
+      padding: 4px 12px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: #6e7681;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.15s;
+    }
+    .filter-btn:hover   { border-color: #388bfd; color: #388bfd; }
+    .filter-btn.active  { background: #1c2b3a; border-color: #388bfd; color: #388bfd; }
+    .filter-btn.f-critical.active { background: #1f0c0c; border-color: #f85149; color: #f85149; }
+    .filter-btn.f-high.active     { background: #1f1600; border-color: #d29922; color: #d29922; }
+
+    /* ── App table ── */
+    .app-table { width: 100%; }
+    .app-table th {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      color: #6e7681;
+      text-transform: uppercase;
+      padding: 10px 18px;
+      border-bottom: 1px solid var(--border);
+      background: #0d1017;
+      font-weight: 500;
+    }
+    .app-row {
+      border-bottom: 1px solid #161b22;
+      transition: background 0.1s;
+    }
+    .app-row:hover { background: #161b22; }
+    .app-row.revoked { opacity: 0.35; }
+    .app-row td { padding: 13px 18px; vertical-align: middle; }
+    .app-name   { font-weight: 500; color: #e6edf3; font-size: 13px; }
+    .app-pub    { font-size: 11px; color: #6e7681; margin-top: 2px; }
+    .score-bar  {
+      width: 80px; height: 4px;
+      background: #21262d; border-radius: 2px;
+      margin-top: 4px; overflow: hidden;
+    }
+    .score-fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
+    .scope-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+    .scope-chip {
+      font-family: var(--mono);
+      font-size: 9px;
+      padding: 2px 7px;
+      border-radius: 3px;
+      background: #161b22;
+      color: #8b949e;
+      border: 1px solid #21262d;
+    }
+    .scope-chip.danger-chip {
+      background: #1f0c0c;
+      color: #f85149;
+      border-color: #3a1515;
+    }
+    .flag-text {
+      font-size: 11px;
+      color: #8b949e;
+      max-width: 220px;
+      line-height: 1.4;
+    }
+    .revoke-btn {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.5px;
+      padding: 5px 12px;
+      border-radius: 4px;
+      border: 1px solid #3a1515;
+      background: transparent;
+      color: #f85149;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .revoke-btn:hover:not(:disabled) { background: #1f0c0c; }
+    .revoke-btn:disabled { opacity: 0.4; cursor: default; color: #6e7681; border-color: var(--border); }
+
+    /* ── Badge overrides for dark theme ── */
+    .badge.bg-danger  { background-color: #1f0c0c !important; color: #f85149 !important; border: 1px solid #3a1515; }
+    .badge.bg-warning { background-color: #1f1600 !important; color: #d29922 !important; border: 1px solid #3a2800; }
+    .badge.bg-info    { background-color: #0c1b2e !important; color: #388bfd !important; border: 1px solid #1c3a5c; }
+    .badge.bg-success { background-color: #0c1f0f !important; color: #3fb950 !important; border: 1px solid #1a3a1f; }
+    .badge { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; font-weight: 600; padding: 4px 8px; }
+
+    /* ── Threat feed ── */
+    .threat-feed { overflow: hidden; }
+    .feed-empty {
+      padding: 40px 18px;
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: #30363d;
+    }
+    .feed-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid #161b22;
+      position: relative;
+    }
+    .feed-item::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+    }
+    .feed-item.ev-capture::before  { background: #f85149; }
+    .feed-item.ev-evicted::before  { background: #3fb950; }
+    .feed-item.ev-exfil::before   { background: #d29922; }
+    .feed-item.ev-attempt::before { background: #388bfd; }
+
+    .feed-type {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .feed-type.t-capture { color: #f85149; }
+    .feed-type.t-evicted { color: #3fb950; }
+    .feed-type.t-exfil   { color: #d29922; }
+    .feed-type.t-attempt { color: #388bfd; }
+
+    .feed-email  { font-size: 12px; color: #e6edf3; margin-bottom: 4px; }
+    .feed-time   { font-family: var(--mono); font-size: 10px; color: #6e7681; }
+    .kill-btn {
+      font-family: var(--mono);
+      font-size: 9px;
+      padding: 3px 10px;
+      border-radius: 3px;
+      border: 1px solid #3a1515;
+      background: transparent;
+      color: #f85149;
+      cursor: pointer;
+      float: right;
+      margin-top: -20px;
+      transition: all 0.15s;
+    }
+    .kill-btn:hover:not(:disabled) { background: #1f0c0c; }
+    .kill-btn:disabled { opacity: 0.4; cursor: default; }
+
+    /* ── Empty app state ── */
+    .apps-empty {
+      padding: 40px;
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: #30363d;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top nav -->
+  <div class="topnav">
+    <div class="nav-brand">
+      <span class="shield">⬡</span>
+      TokenGuard
+    </div>
+    <div class="nav-tag">SOC DASHBOARD</div>
+    <div class="nav-tag">DEFENSIVE TRACK</div>
+    <div class="live-indicator">
+      <div class="live-dot"></div>
+      LIVE — polling every 5s
+    </div>
+  </div>
+
+  <div class="page">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div class="page-title">Identity Detection & Response</div>
+      <div class="page-heading">OAuth Permission Grant Monitor</div>
+    </div>
+
+    <!-- Stats grid -->
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-num c-total" id="s-total">{{ stats.total }}</div>
+        <div class="stat-label">Total Apps</div>
+      </div>
+      <div class="stat-card danger-card">
+        <div class="stat-num c-critical" id="s-critical">{{ stats.critical }}</div>
+        <div class="stat-label">Critical</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num c-high" id="s-high">{{ stats.high }}</div>
+        <div class="stat-label">High Risk</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num c-medium" id="s-medium">{{ stats.medium }}</div>
+        <div class="stat-label">Medium</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num c-low" id="s-low">{{ stats.low }}</div>
+        <div class="stat-label">Low Risk</div>
+      </div>
+      <div class="stat-card attack-card" id="attack-card">
+        <div class="stat-num c-attack" id="s-attacks">{{ stats.live_attacks }}</div>
+        <div class="stat-label">Live Attacks</div>
+      </div>
+    </div>
+
+    <!-- Two-column: app table + threat feed -->
+    <div class="two-col">
+
+      <!-- App table -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Registered OAuth Applications</div>
+          <div class="panel-count" id="app-count">{{ apps | length }} apps</div>
+        </div>
+        <div class="filter-bar">
+          <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+          <button class="filter-btn f-critical" onclick="setFilter('critical', this)">Critical</button>
+          <button class="filter-btn f-high" onclick="setFilter('high', this)">High</button>
+          <button class="filter-btn" onclick="setFilter('medium', this)">Medium</button>
+          <button class="filter-btn" onclick="setFilter('low', this)">Low</button>
+        </div>
+        <table class="app-table">
+          <thead>
+            <tr>
+              <th>Application</th>
+              <th>Risk Level</th>
+              <th>Scopes</th>
+              <th>Primary Flag</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="app-tbody">
+            {% for app in apps %}
+            <tr class="app-row {% if app.revoked %}revoked{% endif %}"
+                data-level="{{ app.level }}"
+                data-id="{{ app.id }}"
+                id="row-{{ app.id }}">
+              <td>
+                <div class="app-name">{{ app.name }}</div>
+                <div class="app-pub">{{ app.publisher }}</div>
+                <div class="score-bar">
+                  <div class="score-fill" style="
+                    width: {{ app.score }}%;
+                    background: {% if app.level == 'critical' %}#f85149{% elif app.level == 'high' %}#d29922{% elif app.level == 'medium' %}#388bfd{% else %}#3fb950{% endif %};
+                  "></div>
+                </div>
+              </td>
+              <td>
+                <span class="{{ app.badge_class }}">{{ app.level | upper }}</span>
+                <div style="font-family: var(--mono); font-size: 10px; color: #6e7681; margin-top: 4px;">
+                  {{ app.score }}/100
+                </div>
+              </td>
+              <td>
+                <div class="scope-chips">
+                  {% for s in app.scopes %}
+                  <span class="scope-chip {% if 'mail' in s or 'drive' in s or 'admin' in s %}danger-chip{% endif %}">
+                    {{ s.split('/')[-1] if '/' in s else s }}
+                  </span>
+                  {% endfor %}
+                </div>
+              </td>
+              <td>
+                <div class="flag-text">{{ app.flags[0] if app.flags else '—' }}</div>
+              </td>
+              <td>
+                {% if app.revoked %}
+                <button class="revoke-btn" disabled>REVOKED</button>
+                {% else %}
+                <button class="revoke-btn" onclick="revokeApp('{{ app.id }}', this)">
+                  REVOKE
+                </button>
+                {% endif %}
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="5" class="apps-empty">No applications loaded</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Threat feed -->
+      <div class="panel" style="align-self: start;">
+        <div class="panel-header">
+          <div class="panel-title">Live Threat Feed</div>
+          <div class="live-dot" style="margin-left: auto;"></div>
+        </div>
+        <div class="threat-feed" id="threat-feed">
+          {% if not events %}
+          <div class="feed-empty">
+            No events yet.<br>Run offensive server & visit localhost:5001
+          </div>
+          {% endif %}
+          {% for ev in events %}
+          <div class="feed-item
+            {% if ev.type == 'token_captured' %}ev-capture
+            {% elif ev.type == 'token_evicted' %}ev-evicted
+            {% elif ev.type == 'exfil_complete' %}ev-exfil
+            {% else %}ev-attempt{% endif %}">
+
+            {% if ev.type == 'token_captured' and ev.status == 'active' %}
+            <button class="kill-btn" onclick="killToken('{{ ev.token_id }}', this)">
+              KILL TOKEN
+            </button>
+            {% endif %}
+
+            <div class="feed-type
+              {% if ev.type == 'token_captured' %}t-capture
+              {% elif ev.type == 'token_evicted' %}t-evicted
+              {% elif ev.type == 'exfil_complete' %}t-exfil
+              {% else %}t-attempt{% endif %}">
+              {% if ev.type == 'token_captured' %}⚠ TOKEN CAPTURED
+              {% elif ev.type == 'token_evicted' %}✓ TOKEN EVICTED
+              {% elif ev.type == 'exfil_complete' %}⬇ EXFIL COMPLETE
+              {% elif ev.type == 'auth_attempt' %}→ AUTH ATTEMPT
+              {% else %}{{ ev.type | upper }}{% endif %}
+            </div>
+            <div class="feed-email">
+              {{ ev.email if ev.email else ev.message if ev.message else '—' }}
+            </div>
+            <div class="feed-time">{{ ev.timestamp }}</div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // ── Filter ────────────────────────────────────────────────────────────────
+    let currentFilter = 'all';
+
+    function setFilter(level, btn) {
+      currentFilter = level;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.app-row').forEach(row => {
+        const match = level === 'all' || row.dataset.level === level;
+        row.style.display = match ? '' : 'none';
+      });
+    }
+
+    // ── Revoke app ────────────────────────────────────────────────────────────
+    function revokeApp(appId, btn) {
+      btn.disabled = true;
+      btn.textContent = '...';
+      fetch(`/api/revoke/${appId}`, { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+          if (data.success) {
+            btn.textContent = 'REVOKED';
+            const row = document.getElementById(`row-${appId}`);
+            if (row) row.classList.add('revoked');
+          } else {
+            btn.textContent = 'ERROR';
+            btn.disabled = false;
+          }
+        })
+        .catch(() => { btn.textContent = 'FAILED'; btn.disabled = false; });
+    }
+
+    // ── Kill switch ───────────────────────────────────────────────────────────
+    function killToken(tokenId, btn) {
+      btn.disabled = true;
+      btn.textContent = 'KILLING...';
+      fetch(`/api/kill/${tokenId}`, { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+          if (data.kill_sent) {
+            btn.textContent = '✓ KILLED';
+            btn.style.color = '#3fb950';
+            btn.style.borderColor = '#1a3a1f';
+          } else {
+            btn.textContent = 'OFFLINE';
+            btn.disabled = false;
+          }
+        })
+        .catch(() => { btn.textContent = 'FAILED'; btn.disabled = false; });
+    }
+
+    // ── Live polling — refresh stats and events every 5s ─────────────────────
+    function refreshStats() {
+      fetch('/api/stats')
+        .then(r => r.json())
+        .then(s => {
+          document.getElementById('s-total').textContent    = s.total;
+          document.getElementById('s-critical').textContent = s.critical;
+          document.getElementById('s-high').textContent     = s.high;
+          document.getElementById('s-medium').textContent   = s.medium;
+          document.getElementById('s-low').textContent      = s.low;
+          document.getElementById('s-attacks').textContent  = s.live_attacks;
+          // Flash the attack card red if there are live attacks
+          const card = document.getElementById('attack-card');
+          if (s.live_attacks > 0) {
+            card.style.background = '#150b0b';
+          }
+        })
+        .catch(() => {});
+    }
+
+    function refreshEvents() {
+      fetch('/api/events')
+        .then(r => r.json())
+        .then(events => {
+          const feed = document.getElementById('threat-feed');
+          if (!events.length) return;
+          feed.innerHTML = events.map(ev => {
+            const isCapture = ev.type === 'token_captured';
+            const isEvicted = ev.type === 'token_evicted';
+            const isExfil   = ev.type === 'exfil_complete';
+            const cls = isCapture ? 'ev-capture' : isEvicted ? 'ev-evicted' : isExfil ? 'ev-exfil' : 'ev-attempt';
+            const tcls= isCapture ? 't-capture'  : isEvicted ? 't-evicted'  : isExfil ? 't-exfil'   : 't-attempt';
+            const label = isCapture ? '⚠ TOKEN CAPTURED' : isEvicted ? '✓ TOKEN EVICTED' : isExfil ? '⬇ EXFIL COMPLETE' : ev.type.toUpperCase();
+            const who   = ev.email || ev.message || '—';
+            const killBtn = (isCapture && ev.status === 'active' && ev.token_id)
+              ? `<button class="kill-btn" onclick="killToken('${ev.token_id}', this)">KILL TOKEN</button>`
+              : '';
+            return `
+              <div class="feed-item ${cls}">
+                ${killBtn}
+                <div class="feed-type ${tcls}">${label}</div>
+                <div class="feed-email">${who}</div>
+                <div class="feed-time">${ev.timestamp || ''}</div>
+              </div>`;
+          }).join('');
+        })
+        .catch(() => {});
+    }
+
+    // Start polling
+    setInterval(refreshStats, 5000);
+    setInterval(refreshEvents, 3000);
+  </script>
+</body>
+</html>

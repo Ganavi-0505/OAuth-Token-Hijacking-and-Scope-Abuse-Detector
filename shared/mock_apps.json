@@ -1,0 +1,44 @@
+[
+  {
+    "id": "app_001",
+    "name": "Mail Exporter Pro",
+    "publisher": "DataSync LLC",
+    "scopes": ["https://mail.google.com", "offline_access", "email"],
+    "connected_at": "2025-01-14"
+  },
+  {
+    "id": "app_002",
+    "name": "Drive Backup Sync",
+    "publisher": "CloudStore Inc",
+    "scopes": ["https://www.googleapis.com/auth/drive", "offline_access"],
+    "connected_at": "2025-02-28"
+  },
+  {
+    "id": "app_003",
+    "name": "Calendar Assistant",
+    "publisher": "Productivity Labs",
+    "scopes": ["https://www.googleapis.com/auth/calendar", "email", "profile"],
+    "connected_at": "2025-03-10"
+  },
+  {
+    "id": "app_004",
+    "name": "Slack Notifier",
+    "publisher": "Notif.io",
+    "scopes": ["email", "profile", "openid"],
+    "connected_at": "2025-04-01"
+  },
+  {
+    "id": "app_005",
+    "name": "Admin Directory Bot",
+    "publisher": "OrgManager Pro",
+    "scopes": ["https://www.googleapis.com/auth/admin.directory.user", "offline_access"],
+    "connected_at": "2025-04-18"
+  },
+  {
+    "id": "app_006",
+    "name": "Sheet Analyzer",
+    "publisher": "DataViz Corp",
+    "scopes": ["https://www.googleapis.com/auth/spreadsheets", "email"],
+    "connected_at": "2025-05-02"
+  }
+]

